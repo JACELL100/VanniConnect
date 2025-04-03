@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Transcriptions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .transcription {
+            border: 1px solid #ddd;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .original {
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .translation {
+            color: #000;
+            font-weight: bold;
+        }
+        .meta {
+            font-size: 0.9em;
+            color: #888;
+            margin-top: 10px;
+        }
+        .no-items {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .back-button {
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Saved Transcriptions</h1>
+        <a href="{% url 'speech_to_text' %}" class="back-button">Back to Speech Recognition</a>
+    </div>
+
+    {% if transcriptions %}
+        {% for item in transcriptions %}
+        <div class="transcription">
+            <div class="original">
+                <strong>Original ({{ item.original_language }}):</strong><br>
+                {{ item.original_text }}
+            </div>
+            <div class="translation">
+                <strong>English Translation:</strong><br>
+                {{ item.english_translation }}
+            </div>
+            <div class="meta">
+                Recorded on: {{ item.timestamp }}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="no-items">
+            No transcriptions found. Start recording to see them here!
+        </div>
+    {% endif %}
+</body>
+</html> 
