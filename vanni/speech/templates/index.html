@@ -1,280 +1,362 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Speech to Text</title>
-    <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            text-align: center; 
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        textarea { 
-            width: 100%; 
-            height: 100px; 
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-        }
-        select { 
-            padding: 8px; 
-            margin: 10px; 
-            width: 250px;
-        }
-        optgroup { 
-            font-weight: bold;
-        }
-        .controls {
-            margin: 20px 0;
-        }
-        button {
-            padding: 10px 20px;
-            margin: 0 5px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        #start {
-            background-color: #28a745;
-            color: white;
-        }
-        #stop {
-            background-color: #dc3545;
-            color: white;
-        }
-        #send {
-            background-color: #007bff;
-            color: white;
-            margin-top: 10px;
-        }
-        .translation-box {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-        }
-        .view-all {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-        .text-box {
-            margin: 20px 0;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: white;
-        }
-        #send:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-    </style>
-</head>
-<body>
-    <h2>Speech to Text (Multi-Language)</h2>
-    
-    <select id="language">
-        <!-- Most Common Languages -->
-        <optgroup label="Common Languages">
-            <option value="en-US">English (US)</option>
-            <option value="en-GB">English (UK)</option>
-            <option value="es-ES">Spanish</option>
-            <option value="fr-FR">French</option>
-            <option value="de-DE">German</option>
-            <option value="zh-CN">Chinese (Simplified)</option>
-            <option value="ja-JP">Japanese</option>
-        </optgroup>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VaaniConnect - Speech to Text</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 sticky top-0 z-10 shadow-lg">
+      <div class="max-w-6xl mx-auto px-4">
+        <div class="flex justify-between h-16">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 flex items-center">
+              <img
+                class="h-10 w-auto"
+                src="https://i.imgur.com/xz9ypbM.png"
+                alt="VaaniConnect Logo"
+              />
+              <span
+                class="ml-2 text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-500 bg-clip-text text-transparent"
+                >VaaniConnect</span
+              >
+            </div>
+          </div>
+          <div class="flex items-center space-x-4">
+            <a
+              href="#"
+              class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+              >About</a
+            >
+            <a
+              href="#"
+              class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+              >Features</a
+            >
+            <a
+              href="{% url 'speech_to_text' %}"
+              class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+              >Get Help</a
+            >
+            <a
+              href="#"
+              class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium"
+              >Get Started</a
+            >
+          </div>
+        </div>
+      </div>
+    </nav>
 
-        <!-- Indian Languages -->
-        <optgroup label="Indian Languages">
-            <!-- Major Indian Languages -->
-            <option value="hi-IN">Hindi (हिन्दी)</option>
-            <option value="bn-IN">Bengali (বাংলা)</option>
-            <option value="te-IN">Telugu (తెలుగు)</option>
-            <option value="ta-IN">Tamil (தமிழ்)</option>
-            <option value="mr-IN">Marathi (मराठी)</option>
-            <option value="gu-IN">Gujarati (ગુજરાતી)</option>
-            <option value="kn-IN">Kannada (ಕನ್ನಡ)</option>
-            <option value="ml-IN">Malayalam (മലയാളം)</option>
-            <option value="pa-IN">Punjabi (ਪੰਜਾਬੀ)</option>
-            <option value="or-IN">Odia (ଓଡ଼ିଆ)</option>
-            <option value="as-IN">Assamese (অসমীয়া)</option>
-            
-            <!-- Less Common Indian Languages -->
-            <option value="ur-IN">Urdu (اردو)</option>
-            <option value="sd-IN">Sindhi (سنڌي)</option>
-            <option value="kok-IN">Konkani (कोंकणी)</option>
-            <option value="mai-IN">Maithili (मैथिली)</option>
-            <option value="ne-IN">Nepali (नेपाली)</option>
-            <option value="brx-IN">Bodo (बड़ो)</option>
-            <option value="doi-IN">Dogri (डोगरी)</option>
-            <option value="ks-IN">Kashmiri (कश्मीरी)</option>
-            <option value="sa-IN">Sanskrit (संस्कृतम्)</option>
-            <option value="sat-IN">Santali (ᱥᱟᱱᱛᱟᱲᱤ)</option>
-            <option value="mni-IN">Manipuri (মৈতৈলোন্)</option>
-            <option value="gom-IN">Goan Konkani (कोंकणी)</option>
-            <option value="raj-IN">Rajasthani (राजस्थानी)</option>
-            <option value="bho-IN">Bhojpuri (भोजपुरी)</option>
-            <option value="mag-IN">Magahi (मगही)</option>
-            <option value="sck-IN">Sadri (सादरी)</option>
-            <option value="bhb-IN">Bhili (भीली)</option>
-            <option value="kha-IN">Khasi (খাসি)</option>
-            <option value="lus-IN">Mizo (Mizo ṭawng)</option>
-            <option value="awa-IN">Awadhi (अवधी)</option>
-            <option value="cgo-IN">Chhattisgarhi (छत्तीसगढ़ी)</option>
-            <option value="tcy-IN">Tulu (ತುಳು)</option>
-            <option value="kfy-IN">Kumaoni (कुमाऊँनी)</option>
-            <option value="gon-IN">Gondi (गोंडी)</option>
-        </optgroup>
+    <div class="max-w-6xl mx-auto px-4 py-12">
+      <div class="text-center mb-10">
+        <h2 class="text-3xl font-bold text-white mb-2">Speech to Text</h2>
+        <p class="text-gray-400">
+          Speak in any language, we'll translate it for you
+        </p>
+      </div>
 
-        <!-- Asian Languages -->
-        <optgroup label="Asian Languages">
-            <option value="ko-KR">Korean</option>
-            <option value="zh-TW">Chinese (Traditional)</option>
-            <option value="th-TH">Thai</option>
-            <option value="vi-VN">Vietnamese</option>
-            <option value="id-ID">Indonesian</option>
-            <option value="ms-MY">Malay</option>
-        </optgroup>
+      <div class="bg-gray-800 rounded-lg p-8 border border-gray-700 shadow-lg">
+        <div class="mb-6">
+          <label
+            for="language"
+            class="block text-gray-300 text-sm font-medium mb-2"
+            >Select Your Language</label
+          >
+          <select
+            id="language"
+            class="bg-gray-900 text-white w-full px-4 py-2 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+            <!-- Most Common Languages -->
+            <optgroup label="Common Languages">
+              <option value="en-US">English (US)</option>
+              <option value="en-GB">English (UK)</option>
+              <option value="es-ES">Spanish</option>
+              <option value="fr-FR">French</option>
+              <option value="de-DE">German</option>
+              <option value="zh-CN">Chinese (Simplified)</option>
+              <option value="ja-JP">Japanese</option>
+            </optgroup>
 
-        <!-- European Languages -->
-        <optgroup label="European Languages">
-            <option value="it-IT">Italian</option>
-            <option value="pt-PT">Portuguese</option>
-            <option value="ru-RU">Russian</option>
-            <option value="nl-NL">Dutch</option>
-            <option value="pl-PL">Polish</option>
-            <option value="tr-TR">Turkish</option>
-            <option value="cs-CZ">Czech</option>
-            <option value="sv-SE">Swedish</option>
-            <option value="da-DK">Danish</option>
-            <option value="fi-FI">Finnish</option>
-            <option value="el-GR">Greek</option>
-            <option value="hu-HU">Hungarian</option>
-            <option value="ro-RO">Romanian</option>
-        </optgroup>
+            <!-- Indian Languages -->
+            <optgroup label="Indian Languages">
+              <!-- Major Indian Languages -->
+              <option value="hi-IN">Hindi (हिन्दी)</option>
+              <option value="bn-IN">Bengali (বাংলা)</option>
+              <option value="te-IN">Telugu (తెలుగు)</option>
+              <option value="ta-IN">Tamil (தமிழ்)</option>
+              <option value="mr-IN">Marathi (मराठी)</option>
+              <option value="gu-IN">Gujarati (ગુજરાતી)</option>
+              <option value="kn-IN">Kannada (ಕನ್ನಡ)</option>
+              <option value="ml-IN">Malayalam (മലയാളം)</option>
+              <option value="pa-IN">Punjabi (ਪੰਜਾਬੀ)</option>
+              <option value="or-IN">Odia (ଓଡ଼ିଆ)</option>
+              <option value="as-IN">Assamese (অসমীয়া)</option>
 
-        <!-- Middle Eastern Languages -->
-        <optgroup label="Middle Eastern Languages">
-            <option value="ar-SA">Arabic</option>
-            <option value="fa-IR">Persian</option>
-            <option value="he-IL">Hebrew</option>
-        </optgroup>
-    </select>
+              <!-- Less Common Indian Languages -->
+              <option value="ur-IN">Urdu (اردو)</option>
+              <option value="sd-IN">Sindhi (سنڌي)</option>
+              <option value="kok-IN">Konkani (कोंकणी)</option>
+              <option value="mai-IN">Maithili (मैथिली)</option>
+              <option value="ne-IN">Nepali (नेपाली)</option>
+              <option value="brx-IN">Bodo (बड़ो)</option>
+              <option value="doi-IN">Dogri (डोगरी)</option>
+              <option value="ks-IN">Kashmiri (कश्मीरी)</option>
+              <option value="sa-IN">Sanskrit (संस्कृतम्)</option>
+              <option value="sat-IN">Santali (ᱥᱟᱱᱛᱟᱲᱤ)</option>
+              <option value="mni-IN">Manipuri (মৈতৈলোন্)</option>
+              <option value="gom-IN">Goan Konkani (कोंकणी)</option>
+              <option value="raj-IN">Rajasthani (राजस्थानी)</option>
+              <option value="bho-IN">Bhojpuri (भोजपुरी)</option>
+              <option value="mag-IN">Magahi (मगही)</option>
+              <option value="sck-IN">Sadri (सादरी)</option>
+              <option value="bhb-IN">Bhili (भीली)</option>
+              <option value="kha-IN">Khasi (খাসি)</option>
+              <option value="lus-IN">Mizo (Mizo ṭawng)</option>
+              <option value="awa-IN">Awadhi (अवधी)</option>
+              <option value="cgo-IN">Chhattisgarhi (छत्तीसगढ़ी)</option>
+              <option value="tcy-IN">Tulu (ತುಳು)</option>
+              <option value="kfy-IN">Kumaoni (कुमाऊँनी)</option>
+              <option value="gon-IN">Gondi (गोंडी)</option>
+            </optgroup>
 
-    <div class="controls">
-        <button id="start">Start Speech Recognition</button>
-        <button id="stop">Stop</button>
+            <!-- Asian Languages -->
+            <optgroup label="Asian Languages">
+              <option value="ko-KR">Korean</option>
+              <option value="zh-TW">Chinese (Traditional)</option>
+              <option value="th-TH">Thai</option>
+              <option value="vi-VN">Vietnamese</option>
+              <option value="id-ID">Indonesian</option>
+              <option value="ms-MY">Malay</option>
+            </optgroup>
+
+            <!-- European Languages -->
+            <optgroup label="European Languages">
+              <option value="it-IT">Italian</option>
+              <option value="pt-PT">Portuguese</option>
+              <option value="ru-RU">Russian</option>
+              <option value="nl-NL">Dutch</option>
+              <option value="pl-PL">Polish</option>
+              <option value="tr-TR">Turkish</option>
+              <option value="cs-CZ">Czech</option>
+              <option value="sv-SE">Swedish</option>
+              <option value="da-DK">Danish</option>
+              <option value="fi-FI">Finnish</option>
+              <option value="el-GR">Greek</option>
+              <option value="hu-HU">Hungarian</option>
+              <option value="ro-RO">Romanian</option>
+            </optgroup>
+
+            <!-- Middle Eastern Languages -->
+            <optgroup label="Middle Eastern Languages">
+              <option value="ar-SA">Arabic</option>
+              <option value="fa-IR">Persian</option>
+              <option value="he-IL">Hebrew</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-6">
+          <div class="md:w-1/2">
+            <div
+              class="bg-gray-900 rounded-lg p-6 border border-gray-700 h-full flex flex-col"
+            >
+              <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                <span
+                  class="p-2 rounded-full bg-purple-800 text-purple-300 mr-3"
+                >
+                  <i class="fas fa-microphone"></i>
+                </span>
+                Original Text
+              </h3>
+              <textarea
+                id="output"
+                placeholder="Your speech will appear here..."
+                readonly
+                class="flex-grow bg-gray-800 text-white p-4 rounded-md border border-gray-700 resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 min-h-[120px] mb-4"
+              ></textarea>
+
+              <div class="flex justify-center space-x-4">
+                <button
+                  id="start"
+                  class="px-6 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white font-medium rounded-md flex items-center"
+                >
+                  <i class="fas fa-play mr-2"></i> Start
+                </button>
+                <button
+                  id="stop"
+                  class="px-6 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-medium rounded-md flex items-center"
+                >
+                  <i class="fas fa-stop mr-2"></i> Stop
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="md:w-1/2">
+            <div
+              class="bg-gray-900 rounded-lg p-6 border border-gray-700 h-full flex flex-col"
+            >
+              <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                <span class="p-2 rounded-full bg-blue-800 text-blue-300 mr-3">
+                  <i class="fas fa-language"></i>
+                </span>
+                English Translation
+              </h3>
+              <textarea
+                id="translation"
+                placeholder="Click 'Send for Translation' to see the English translation..."
+                readonly
+                class="flex-grow bg-gray-800 text-white p-4 rounded-md border border-gray-700 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[120px] mb-4"
+              ></textarea>
+
+              <button
+                id="send"
+                disabled
+                class="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium rounded-md flex items-center justify-center"
+              >
+                <i class="fas fa-paper-plane mr-2"></i> Send for Translation
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 flex justify-center">
+          <a
+            href="{% url 'view_transcriptions' %}"
+            class="inline-flex items-center px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md"
+          >
+            <i class="fas fa-history mr-2"></i> View All Transcriptions
+          </a>
+        </div>
+      </div>
     </div>
 
-    <div class="text-box">
-        <h3>Original Text</h3>
-        <textarea id="output" placeholder="Speech will appear here..." readonly></textarea>
-        <button id="send" disabled>Send</button>
-    </div>
-
-    <div class="translation-box">
-        <h3>English Translation</h3>
-        <textarea id="translation" placeholder="Click 'Send for Translation' to see the English translation..." readonly></textarea>
-    </div>
-
-    <a href="{% url 'view_transcriptions' %}" class="view-all">View All Transcriptions</a>
+    <!-- Footer -->
+    <footer class="bg-gray-800 py-6 mt-12">
+      <div class="max-w-6xl mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <div class="flex items-center mb-4 md:mb-0">
+            <img
+              class="h-8 w-auto"
+              src="https://i.imgur.com/xz9ypbM.png"
+              alt="VaaniConnect Logo"
+            />
+            <span
+              class="ml-2 text-lg font-bold bg-gradient-to-r from-purple-400 to-blue-500 bg-clip-text text-transparent"
+              >VaaniConnect</span
+            >
+          </div>
+          <div class="text-gray-400 text-sm">
+            &copy; 2025 VaaniConnect. All rights reserved.
+          </div>
+        </div>
+      </div>
+    </footer>
 
     <script>
-        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        recognition.interimResults = true;
-        recognition.continuous = true;
+      const recognition = new (window.SpeechRecognition ||
+        window.webkitSpeechRecognition)();
+      recognition.interimResults = true;
+      recognition.continuous = true;
 
-        const startButton = document.getElementById("start");
-        const stopButton = document.getElementById("stop");
-        const sendButton = document.getElementById("send");
-        const outputTextarea = document.getElementById("output");
-        const translationTextarea = document.getElementById("translation");
+      const startButton = document.getElementById("start");
+      const stopButton = document.getElementById("stop");
+      const sendButton = document.getElementById("send");
+      const outputTextarea = document.getElementById("output");
+      const translationTextarea = document.getElementById("translation");
 
-        startButton.addEventListener("click", () => {
-            const lang = document.getElementById("language").value;
-            recognition.lang = lang;
-            recognition.start();
-            outputTextarea.value = "";
-            translationTextarea.value = "";
-            sendButton.disabled = true;
-        });
+      startButton.addEventListener("click", () => {
+        const lang = document.getElementById("language").value;
+        recognition.lang = lang;
+        recognition.start();
+        outputTextarea.value = "";
+        translationTextarea.value = "";
+        sendButton.disabled = true;
+        startButton.classList.add("ring-2", "ring-green-500");
+        stopButton.classList.remove("ring-2", "ring-red-500");
+      });
 
-        stopButton.addEventListener("click", () => {
-            recognition.stop();
-            if (outputTextarea.value.trim()) {
-                sendButton.disabled = false;
-            }
-        });
+      stopButton.addEventListener("click", () => {
+        recognition.stop();
+        if (outputTextarea.value.trim()) {
+          sendButton.disabled = false;
+        }
+        stopButton.classList.add("ring-2", "ring-red-500");
+        startButton.classList.remove("ring-2", "ring-green-500");
+      });
 
-        recognition.onresult = (event) => {
-            let transcript = "";
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                if (event.results[i].isFinal) {
-                    transcript = event.results[i][0].transcript;
-                }
-            }
-            outputTextarea.value = transcript;
-            if (transcript.trim()) {
-                sendButton.disabled = false;
-            }
-        };
+      recognition.onresult = (event) => {
+        let transcript = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          if (event.results[i].isFinal) {
+            transcript = event.results[i][0].transcript;
+          }
+        }
+        outputTextarea.value = transcript;
+        if (transcript.trim()) {
+          sendButton.disabled = false;
+        }
+      };
 
-        recognition.onerror = (event) => {
-            console.error("Speech Recognition Error:", event.error);
-        };
+      recognition.onerror = (event) => {
+        console.error("Speech Recognition Error:", event.error);
+      };
 
-        sendButton.addEventListener("click", async () => {
-            const text = outputTextarea.value.trim();
-            const language = recognition.lang;
-            
-            if (!text) return;
+      sendButton.addEventListener("click", async () => {
+        const text = outputTextarea.value.trim();
+        const language = recognition.lang;
 
-            sendButton.disabled = true;
-            sendButton.textContent = "Translating...";
+        if (!text) return;
 
-            try {
-                const response = await fetch('/speech/save/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        text: text,
-                        language: language
-                    })
-                });
+        sendButton.disabled = true;
+        sendButton.innerHTML =
+          '<i class="fas fa-spinner fa-spin mr-2"></i> Translating...';
 
-                const data = await response.json();
-                if (data.status === 'success') {
-                    translationTextarea.value = data.english_translation;
-                    sendButton.textContent = "Sent!";
-                } else {
-                    console.error('Error:', data.message);
-                    sendButton.textContent = "Error - Try Again";
-                    sendButton.disabled = false;
-                }
-            } catch (error) {
-                console.error('Error saving transcription:', error);
-                sendButton.textContent = "Error - Try Again";
-                sendButton.disabled = false;
-            }
-        });
+        try {
+          const response = await fetch("/speech/save/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              text: text,
+              language: language,
+            }),
+          });
 
-        // Reset button text when starting new recording
-        startButton.addEventListener("click", () => {
-            sendButton.textContent = "Send for Translation";
-        });
+          const data = await response.json();
+          if (data.status === "success") {
+            translationTextarea.value = data.english_translation;
+            sendButton.innerHTML = '<i class="fas fa-check mr-2"></i> Sent!';
+          } else {
+            console.error("Error:", data.message);
+            sendButton.innerHTML =
+              '<i class="fas fa-exclamation-triangle mr-2"></i> Error - Try Again';
+            sendButton.disabled = false;
+          }
+        } catch (error) {
+          console.error("Error saving transcription:", error);
+          sendButton.innerHTML =
+            '<i class="fas fa-exclamation-triangle mr-2"></i> Error - Try Again';
+          sendButton.disabled = false;
+        }
+      });
+
+      // Reset button text when starting new recording
+      startButton.addEventListener("click", () => {
+        sendButton.innerHTML =
+          '<i class="fas fa-paper-plane mr-2"></i> Send for Translation';
+      });
     </script>
-</body>
+  </body>
 </html>
-
