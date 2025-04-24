@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import Transcription
-from googletrans import Translator
+from deep_translator import GoogleTranslator
 import json
 
 # Create your views here.
@@ -16,20 +16,25 @@ def save_transcription(request):
         try:
             data = json.loads(request.body)
             original_text = data.get('text')
-            original_language = data.get('language')
+            original_language = data.get('language', '').split('-')[0]  # Get language code without region
 
             # Translate to English if not already in English
             if not original_language.startswith('en'):
-                translator = Translator()
-                translation = translator.translate(original_text, dest='en')
-                english_text = translation.text
+                try:
+                    translator = GoogleTranslator(source=original_language, target='en')
+                    english_text = translator.translate(text=original_text)
+                except Exception as e:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': f'Translation error: {str(e)}'
+                    }, status=500)
             else:
                 english_text = original_text
 
             # Save to database
             transcription = Transcription.objects.create(
                 original_text=original_text,
-                original_language=original_language,
+                original_language=data.get('language'),  # Save full language code
                 english_translation=english_text
             )
 
